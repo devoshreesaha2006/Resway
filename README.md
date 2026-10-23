@@ -7,7 +7,7 @@ An install-free, deterministic civic logistics prototype for coordinating commun
 Requires Node.js 18 or newer. No package installation is needed.
 
 ```powershell
-cd 'C:\Users\ASUS\OneDrive\Desktop\.0'
+cd 'C:\Users\ASUS\OneDrive\Desktop\RESWAY'
 node .\server.mjs
 ```
 
