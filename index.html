@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#101713" />
-    <meta name="description" content="NEXORA coordinates time-sensitive civic aid with explainable dispatch and recovery." />
-    <title>NEXORA — Intelligent Civic Logistics</title>
+    <meta name="description" content="RESWAY coordinates time-sensitive civic aid with explainable dispatch and recovery." />
+    <title>RESWAY — Resources, routed right</title>
     <link rel="stylesheet" href="/src/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <script async src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -16,7 +16,7 @@
       const reportNexoraError = (message) => {
         const root = document.getElementById('app');
         if (!root || root.childElementCount) return;
-        root.innerHTML = '<main style="max-width:680px;margin:12vh auto;padding:28px;color:#e8eee9;font:14px system-ui;background:#17211b;border:1px solid #70483c;border-radius:8px"><b style="color:#ffab91">NEXORA could not start</b><p style="color:#b8c4b8;line-height:1.6">The local prototype hit a startup error. Refresh after the issue is fixed.</p><code style="font-size:11px;color:#ffcfb8"></code></main>';
+        root.innerHTML = '<main style="max-width:680px;margin:12vh auto;padding:28px;color:#e8eee9;font:14px system-ui;background:#17211b;border:1px solid #70483c;border-radius:8px"><b style="color:#ffab91">RESWAY could not start</b><p style="color:#b8c4b8;line-height:1.6">The local prototype hit a startup error. Refresh after the issue is fixed.</p><code style="font-size:11px;color:#ffcfb8"></code></main>';
         root.querySelector('code').textContent = message;
       };
       window.addEventListener('error', (event) => reportNexoraError(event.message || 'Unknown startup error'));

@@ -1,0 +1,2 @@
+import {api} from './client.js';
+export const listAssignments=()=>api('/assignments');export const rankCandidates=batchId=>api('/assignments',{method:'POST',body:JSON.stringify({batchId})});export const updateAssignment=(id,patch)=>api(`/assignments/${id}`,{method:'PATCH',body:JSON.stringify(patch)});export const acceptAssignment=id=>api(`/assignments/${id}/accept`,{method:'POST'});export const reassign=idOrAssignment=>api(`/assignments/${idOrAssignment.id}/reassign`,{method:'POST',body:JSON.stringify({riderId:idOrAssignment.riderId})});

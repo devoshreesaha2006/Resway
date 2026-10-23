@@ -1,0 +1,2 @@
+import {api} from './client.js';
+export const listBatches=()=>api('/batches');export const createBatch=batch=>api('/batches',{method:'POST',body:JSON.stringify(batch)});export const getBatch=id=>api(`/batches/${encodeURIComponent(id)}`);export const updateBatch=(id,patch)=>api(`/batches/${encodeURIComponent(id)}`,{method:'PATCH',body:JSON.stringify(patch)});export const splitBatch=(id,allocations)=>api(`/batches/${encodeURIComponent(id)}/split`,{method:'POST',body:JSON.stringify({allocations})});

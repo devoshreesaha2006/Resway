@@ -1,28 +1,39 @@
-# NEXORA
+# RESWAY
 
-An install-free, deterministic civic logistics prototype for coordinating community resource pickup and delivery.
+**Resources, routed right.** RESWAY coordinates time-sensitive donations, rider delivery, and shelter receiving. The included dataset is deterministic simulated demo data; it does not connect to GPS, live traffic, or real aid services.
 
-## Start on Windows
+## Install and start on Windows
 
-Requires Node.js 18 or newer. No package installation is needed.
+Requires Node.js 20 or newer.
 
 ```powershell
 cd 'C:\Users\ASUS\OneDrive\Desktop\RESWAY'
-node .\server.mjs
+npm install
+npm run db:seed
+npm run dev
 ```
 
-Open [http://localhost:4173](http://localhost:4173). Keep the terminal running while using the app. Press `Ctrl+C` to stop the local server.
+Open http://localhost:4173. Use `npm start` for a non-watch server. Press Ctrl+C to stop it. SQLite is created automatically at `data/resway.sqlite3`; set `RESWAY_DB` to choose another database path. `npm run db:reset` restores the deterministic seed and demo accounts.
 
-## Explore the prototype
+## Demo accounts
 
-- Use the role switcher to explore Operator, Donor, Rider, and Shelter workspaces.
-- On **Dispatch board**, inspect rider and shelter eligibility explanations, then offer a full or split assignment.
-- On **Operations map**, pan and zoom the interactive map, filter markers, highlight a batch, inspect popups, and start or pause deterministic rider movement. Choose an operational scenario to update the shared demo records.
-- On **Rescue mode**, trigger breakdown or missed check-in, compare ranked replacements, and confirm a reassignment. The no-safe-option case blocks reassignment and records an escalation.
-- Use the simulation reset controls to restore the deterministic starting data.
+All seeded accounts use password `resway-demo-2026`.
 
-## Map and data notes
+- `operator@resway.demo` — network operations, dispatch, map, scenarios, Rescue Mode, analytics, and audit
+- `donor@resway.demo` — donor workspace and owned resource batches
+- `rider@resway.demo` — Jordan Lee's rider tasks, delivery, profile, and safety workflows
+- `shelter@resway.demo` — Northside Shelter demand, incoming aid, and receipt confirmation
 
-When the browser can reach the public tile service, the map uses Leaflet with OpenStreetMap tiles and attribution. Leaflet loads from a public CDN. If it is unavailable, the app provides an interactive offline schematic with pan, zoom, filters, markers, and routes. If map tiles fail while Leaflet is available, the map and controls remain interactive and the provider status reports the tile problem.
+The login page also has one-click Demo Mode buttons for each role. New accounts can be created with `/join`.
 
-All locations, assignments, rider movement, ETA calculations, traffic/delay scenarios, events, and analytics are simulated. The app does not receive GPS, live traffic, or connected routing data. Operational demo data is stored in this browser's local storage; it is not a multi-user backend or real authentication system.
+## Features
+
+The original operations map, offline schematic, simulated routes, movement controls, Rescue Mode, seven scenarios, role workspaces, audit log, and responsive layout remain in the app. Browser operations load from and save to the SQLite database through the API; the browser does not store the operational dataset as its database. Authentication uses bcrypt password hashes and an HttpOnly session cookie. The demo route and ETA calculations are deterministic and are not live traffic.
+
+## API
+
+All `/api` routes except `/api/health` and `/api/auth/login`, `/api/auth/signup` require a session cookie. Authentication endpoints include login, signup, logout, and `/auth/me`. Operational routes cover batches (including split), riders, shelters and receipt, assignments and reassignment, incidents, simulation state/scenarios, analytics, and audit events. Role ownership checks are applied to API mutations.
+
+## Validation
+
+Run `npm test` for the API integration suite. The tests cover login, authorization, state persistence, dispatch ranking, split quantities, scenario mutations, and simulation reset.

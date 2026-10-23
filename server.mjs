@@ -1,21 +1,19 @@
+import express from 'express';
+import cookieParser from 'cookie-parser';
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { extname,join,normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-const root = fileURLToPath(new URL('.', import.meta.url));
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
-const server = createServer(async (req, res) => {
-  const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-  const candidate = normalize(join(root, pathname === '/' ? 'index.html' : pathname));
-  if (!candidate.startsWith(root)) { res.writeHead(403).end('Forbidden'); return; }
-  try {
-    const body = await readFile(candidate);
-    res.writeHead(200, { 'content-type': mime[extname(candidate)] || 'application/octet-stream', 'cache-control': 'no-store' });
-    res.end(body);
-  } catch {
-    res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' }).end('Not found');
-  }
-});
-const port = Number(process.env.PORT || 4173);
-server.listen(port, '127.0.0.1', () => console.log(`NEXORA is available at http://localhost:${port}`));
+import { db } from './server/db/index.js';
+import { authRouter } from './server/routes/auth.js';
+import { apiRouter } from './server/routes/api.js';
+import { readState } from './server/services/state.js';
+import { DEMO_PASSWORD } from './server/db/index.js';
+import './server/db/seed.mjs';
+const app=express(),root=fileURLToPath(new URL('.',import.meta.url));
+app.disable('x-powered-by');app.use(express.json({limit:'1mb'}));app.use(cookieParser());
+app.get('/api/health',(_req,res)=>res.json({ok:true,database:'sqlite',demoPassword:DEMO_PASSWORD}));app.use('/api/auth',authRouter);app.use('/api',apiRouter);
+app.use((err,_req,res,_next)=>{console.error(err);const status=Number(err.status)||500;res.status(status).json({error:status===500?'Internal server error':err.message});});
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'};
+app.get('*splat',async(req,res)=>{try{const pathname=decodeURIComponent(new URL(req.originalUrl,'http://localhost').pathname);const candidate=normalize(join(root,pathname==='/'?'index.html':pathname));if(!candidate.startsWith(root))return res.status(403).send('Forbidden');const {readFile}=await import('node:fs/promises');res.set('Cache-Control','no-store').type(mime[extname(candidate)]||'application/octet-stream').send(await readFile(candidate));}catch{res.status(404).type('text').send('Not found');}});
+const port=Number(process.env.PORT||4173);const server=createServer(app);server.listen(port,'127.0.0.1',()=>console.log(`RESWAY is available at http://localhost:${port}`));
+process.on('SIGINT',()=>{server.close(()=>{db.close();process.exit(0)});});

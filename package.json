@@ -6,12 +6,14 @@
   "scripts": {
     "dev": "node --watch server.mjs",
     "start": "node server.mjs",
+    "test": "node --test",
     "db:seed": "node server/db/seed.mjs",
     "db:reset": "node server/db/seed.mjs --reset"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.2.0",
+    "cookie-parser": "^1.0.2",
     "express": "^5.1.0"
   }
 }

@@ -22,11 +22,10 @@ const state={batches:[
 {id:'AS-2048',batchId:'NX-2048',riderId:'R-05',shelterId:'S-01',quantity:84,status:'In Transit',eta:34,progress:0},
 {id:'AS-2047',batchId:'NX-2047',riderId:'R-04',shelterId:'S-02',quantity:120,status:'In transit',eta:28,progress:0},
 {id:'AS-2046',batchId:'NX-2046',riderId:'R-01',shelterId:'S-03',quantity:36,status:'Received',eta:0,progress:1}
-],incidents:[],events:[{id:'EV-SEED-1',time:'09:41',title:'Batch NX-2048 picked up',detail:'Jordan Lee · Greenfield Market to Northside Shelter · 34 min simulated ETA',type:'neutral'}],simulation:{running:false,speed:1,hasRun:false},incident:false,recovered:false,escalated:false,rescueNoSafe:false};
-const tx=db.transaction(()=>{
- db.exec('DELETE FROM sessions; DELETE FROM audit_events; DELETE FROM deliveries; DELETE FROM assignments; DELETE FROM incidents; DELETE FROM batch_items; DELETE FROM batches; DELETE FROM shelter_inventory; DELETE FROM shelter_demands; DELETE FROM riders; DELETE FROM shelters; DELETE FROM simulation_state; DELETE FROM users;');
- const pw=bcrypt.hashSync(DEMO_PASSWORD,10);
- for(const [role,email,name] of [['DONOR','donor@resway.demo','Greenfield Market'],['RIDER','rider@resway.demo','Jordan Lee'],['SHELTER','shelter@resway.demo','Northside Shelter'],['OPERATOR','operator@resway.demo','Alex Morgan']])db.prepare('INSERT INTO users(id,name,email,password_hash,role) VALUES(?,?,?,?,?)').run(randomUUID(),name,email,pw,role);
+],incidents:[],inventory:[],events:[{id:'EV-SEED-1',time:'09:41',title:'Batch NX-2048 picked up',detail:'Jordan Lee · Greenfield Market to Northside Shelter · 34 min simulated ETA',type:'neutral'}],simulation:{running:false,speed:1,hasRun:false},incident:false,recovered:false,escalated:false,rescueNoSafe:false};
+const tx=db.transaction((preserveAccounts=false)=>{
+ db.exec('DELETE FROM audit_events; DELETE FROM deliveries; DELETE FROM assignments; DELETE FROM incidents; DELETE FROM batch_items; DELETE FROM batches; DELETE FROM shelter_inventory; DELETE FROM shelter_demands; DELETE FROM riders; DELETE FROM shelters; DELETE FROM simulation_state;');
+ if(!preserveAccounts){db.exec('DELETE FROM sessions; DELETE FROM users;');const pw=bcrypt.hashSync(DEMO_PASSWORD,10);for(const [role,email,name] of [['DONOR','donor@resway.demo','Greenfield Market'],['RIDER','rider@resway.demo','Jordan Lee'],['SHELTER','shelter@resway.demo','Northside Shelter'],['OPERATOR','operator@resway.demo','Alex Morgan']])db.prepare('INSERT INTO users(id,name,email,password_hash,role) VALUES(?,?,?,?,?)').run(randomUUID(),name,email,pw,role);}
  db.prepare('INSERT INTO shelters(id,name,payload) VALUES(?,?,?)').run('S-01','Northside Shelter',JSON.stringify(state.shelters[0]));
  const sh=db.prepare('INSERT INTO shelters(id,name,payload) VALUES(?,?,?)');for(const s of state.shelters.slice(1))sh.run(s.id,s.name,JSON.stringify(s));
  const demand=db.prepare('INSERT INTO shelter_demands(shelter_id,item_name,quantity) VALUES(?,?,?)');for(const s of state.shelters)for(const [name,q] of Object.entries(s.demand))demand.run(s.id,name,q);
@@ -36,5 +35,9 @@ const tx=db.transaction(()=>{
  const ass=db.prepare('INSERT INTO assignments(id,batch_id,rider_id,shelter_id,quantity,status,eta,progress,payload) VALUES(?,?,?,?,?,?,?,?,?)');for(const a of state.assignments){ass.run(a.id,a.batchId,a.riderId,a.shelterId,a.quantity,a.status,a.eta,a.progress||0,JSON.stringify(a));db.prepare('INSERT INTO deliveries(id,assignment_id,status,payload) VALUES(?,?,?,?)').run('DL-'+a.id,a.id,a.status,JSON.stringify(a))}
  db.prepare('INSERT INTO simulation_state(id,state_json) VALUES(1,?)').run(JSON.stringify(state));
 });
-if(process.argv.includes('--reset')||!db.prepare('SELECT 1 FROM users LIMIT 1').get())tx();
+export function seedDatabase({preserveAccounts=false}={}){tx(preserveAccounts);}
+if(process.argv.includes('--reset')||!db.prepare('SELECT 1 FROM users LIMIT 1').get())seedDatabase();
 console.log(`RESWAY database seeded. Demo password: ${DEMO_PASSWORD}`);
+
+
+
