@@ -11,3 +11,9 @@ coverage/
 *.db
 *.sqlite
 *.sqlite3
+# Local SQLite runtime data (keep databases out of version control)
+data/*.sqlite*
+*data/*.sqlite3
+data/*.sqlite3-shm*
+*data/*.sqlite3-wal
+
